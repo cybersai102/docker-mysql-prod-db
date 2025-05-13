@@ -1,0 +1,77 @@
+Microsoft Windows [Version 10.0.22631.5262]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\yugalsai>docker run -d --name mysql-prod -e MYSQL_ROOT_PASSWORD=Yugal1234@ -p 3307:3306 mysql:8.0
+docker: Error response from daemon: Conflict. The container name "/mysql-prod" is already in use by container "13df6a72a9e04add17e5e54bc983ccb9b854110ff74043b1242a041846241e8c". You have to remove (or rename) that container to be able to reuse that name.
+
+Run 'docker run --help' for more information
+
+C:\Users\yugalsai>docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED        STATUS                      PORTS                               NAMES
+13df6a72a9e0   mysql:8.0      "docker-entrypoint.s…"   16 hours ago   Created                                                         mysql-prod
+0d807fca8447   mysql:8.0      "docker-entrypoint.s…"   4 days ago     Exited (255) 18 hours ago   33060/tcp, 0.0.0.0:3307->3306/tcp   mysql-container
+54c8ef0d63b5   3d439e30915a   "docker-entrypoint.s…"   7 days ago     Exited (255) 4 days ago     0.0.0.0:3000->3000/tcp              tender_margulis
+
+C:\Users\yugalsai>docker rm 13df6a72a9e0
+13df6a72a9e0
+
+C:\Users\yugalsai>docker run -d --name mysql-prod -e MYSQL_ROOT_PASSWORD=Yugal1234@ -p 3307:3306 mysql:8.0
+78b8860747a3902651be8c0254e142ca44ffb8506be0c12febc773f93405dc4c
+
+C:\Users\yugalsai>docker cp C:\Users\yugalsai\prod_dump.sql mysql-prod:/prod_dump.sql
+Successfully copied 2.05kB to mysql-prod:/prod_dump.sql
+
+C:\Users\yugalsai>docker exec -i mysql-prod sh -c 'exec mysql -uroot -p"Yugal1234@"' < /prod_dump.sql
+The system cannot find the file specified.
+
+C:\Users\yugalsai>docker exec -it mysql-prod bash
+bash-5.1#
+bash-5.1# Yugal1234@
+bash: Yugal1234@: command not found
+bash-5.1# mysql -uroot -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 8
+Server version: 8.0.42 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> SOURCE /prod_dump.sql;
+Query OK, 1 row affected (0.13 sec)
+
+Database changed
+Query OK, 0 rows affected (0.06 sec)
+
+Query OK, 3 rows affected (0.03 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
++---------+--------------+---------------------+------------+
+| user_id | name         | email               | created_at |
++---------+--------------+---------------------+------------+
+|       1 | Alice Smith  | alice@example.com   | 2024-01-15 |
+|       2 | Bob Johnson  | bob@example.com     | 2024-02-10 |
+|       3 | Charlie Rose | charlie@example.com | 2024-03-05 |
++---------+--------------+---------------------+------------+
+3 rows in set (0.00 sec)
+
+mysql> exit;
+Bye
+bash-5.1# exit
+exit
+
+C:\Users\yugalsai>docker commit mysql-prod mysql:prod-with-data
+sha256:d27973758bd3929f83c08df89ff00a93beb3ee41e25ff45db694acb7a26c7173
+
+C:\Users\yugalsai>docker images
+REPOSITORY    TAG              IMAGE ID       CREATED         SIZE
+mysql         prod-with-data   d27973758bd3   4 seconds ago   1.06GB
+my-node-app   latest           b685c25b4cdf   7 days ago      1.57GB
+mysql         8.0              51d7ec709cde   4 weeks ago     1.06GB
+
+C:\Users\yugalsai>
